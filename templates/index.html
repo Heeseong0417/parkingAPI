@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundEngin</title>
+</head>
+<body>
+    <form id="f_file">
+    <input onchange="click_event" type="file" id="file_id">클릭하세요!</input>    
+    </form>
+
+</body>
+
+
+<script>
+const click_event=(event)=>{
+console.log(event.target.id)
+alert(
+event+"을 선택하셨습니다.")
+
+}
+const file = document.querySelectorAll("#f_file");
+
+ 
+
+
+</script>
+</html>
