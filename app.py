@@ -9,7 +9,7 @@ from controller import main_controller;
 def create_flask():
 
     app = Flask(__name__)
-    JWTManager(app)
+    jwt =JWTManager(app)
     CORS(app)
     app.config['JWT_SECRET_KEY'] = "valiantdata_parking_project"
     

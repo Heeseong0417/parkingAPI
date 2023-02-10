@@ -33,7 +33,7 @@ class id_overlab(Resource):
         print(value)
         
         try:
-            grab = dao.get_list(self,"users","userId",value)
+            grab = dao.get_user(self,"users","userId",value)
         except:
             grab=[]
         print(grab)
@@ -50,7 +50,7 @@ class car_overlab(Resource):
         print(value)
         
         try:
-            grab = dao.get_list(self,"users","carNum",value)
+            grab = dao.get_user(self,"users","carNum",value)
         except:
             grab=[]
         print(grab)
@@ -109,7 +109,7 @@ class site_up(Resource):
             """
             access_token = create_access_token(identity=userId)
             refresh_token = create_refresh_token(identity=userId)
-
+            
             return jsonify(userId=userId,access_token=access_token, refresh_token=refresh_token, valid=True)
         else:
         # 유저 정보가 없거나 비밀번호가 일치하지 않는 경우 401 코드 반환
@@ -117,23 +117,46 @@ class site_up(Resource):
 
 @Parking.route('/parking_list')
 class Parking_list(Resource):
-
+    @jwt_required()
     def post(self):
-       
-        grab=[]
+        print(request.json)
+        current_user_id = get_jwt_identity()
+        date =request.json["date"]
+        week = request.json["week"]
+        time=request.json["time"]
+        print(date,week,time)
+        grab_id=""
+        grab_list=[]
         
-        value = request.json['userId']
-        
-        print(value)
+     
         
         try:
-
-            grab = dao.get_list(self,"users","carNum",value)
+            grab_id = dao.get_user(self,"users","userId",current_user_id)[0]['carNum']
+           
+            grab_list = dao.get_list(self,"parking_table","입차_일",grab_id,date,week,time)
         
         except:
+            print()
+            #grab_id=[]
+            grab_list=[]
 
-            grab=[]
+        print(grab_list)
+        return([{"name":"오늘 입차 대수","value":len(grab_list)},{"name":"오늘 출차 대수","value":len(grab_list)},{"name":"총 차량 대수","value":len(grab_list)},{"name":"교통량","value":len(grab_list)}])
+        #return [jsonify(name="오늘 입차 대수",value=len(grab_list)),jsonify(name="오늘 출차 대수",value=len(grab_list)),jsonify(name="총 차량 대수",value=len(grab_list)),jsonify(name="교통량",value=len(grab_list))]
+        #return jsonify(today_in=len(grab_list),today_out=len(grab_list),today_all=len(grab_list),traffic=0)
+@Parking.route('/test_token')
 
-        print(grab)
-           
-        return False if grab is None or len(grab)>= 1 else True
+class token(Resource):
+    @jwt_required()
+    def post(self):
+        current_user_id = get_jwt_identity()
+        print(current_user_id)
+        return jsonify(logged_in_as=current_user_id)
+
+@Parking.route('/refresh_token')
+class refresh(Resource): 
+    @jwt_required(refresh=True)
+    def refresh():
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return jsonify(access_token=access_token, current_user=current_user)
