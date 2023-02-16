@@ -39,13 +39,32 @@ class parkingDAO:
         db.close()
         print(ret)
         return ret
+    def get_main(self,table,key,value,date,week,time):
+        ret = []
+        print(table,key,value,date,week,time)
+        db = pymysql.connect(host=con['host'], user=con['user'], db= con['database'],port=con['port'], password=con['password'], charset='utf8')
+        curs = db.cursor(pymysql.cursors.DictCursor)
+        
+        sql = "select * from {table} where date({key}) = date('{date}');".format(table=table,key=key,value=value,date=date,week=week,time=time)
+        print(sql)
+        curs.execute(sql)
+        
+        rows = curs.fetchall()
+        for e in rows:
+            #temp = {'empno':e[0],'name':e[1],'department':e[2],'phone':e[3] }
+            ret.append(e)
+        
+        db.commit()
+        db.close()
+        print(ret)
+        return ret
     def get_list(self,table,key,value,date,week,time):
         ret = []
         print(table,key,value,date,week,time)
         db = pymysql.connect(host=con['host'], user=con['user'], db= con['database'],port=con['port'], password=con['password'], charset='utf8')
         curs = db.cursor(pymysql.cursors.DictCursor)
         
-        sql = "select * from {table} where date(입차_일) = date('{date}');".format(table=table,key=key,value=value,date=date,week=week,time=time)
+        sql = "select * from {table} where date(입차_일) = date('{date}') ORDER BY {key} DESC  limit 100;".format(table=table,key=key,value=value,date=date,week=week,time=time)
         print(sql)
         curs.execute(sql)
         

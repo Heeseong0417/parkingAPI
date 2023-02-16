@@ -1,8 +1,10 @@
  # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
+
+from flask_socketio import SocketIO;
 import bcrypt
 from flask import Flask, current_app, jsonify,render_template,request
-
+import json
 
 from sqlalchemy import create_engine, text
 from flask_cors import CORS, cross_origin
@@ -15,6 +17,7 @@ from modules.database.database import parkingDAO as dao;
 from config.config import Config;
 
 Parking = Namespace("ParkingGoApi",description="traffic api")
+SIO = SocketIO()
 
 """
 parking_model = Parking.model('parking_model',{
@@ -115,6 +118,41 @@ class site_up(Resource):
         # 유저 정보가 없거나 비밀번호가 일치하지 않는 경우 401 코드 반환
             return '', 401
 
+@SIO.on(message="test")
+def handle_my_custom_event(json):
+    print('received my event: ' + str(json))
+    SIO.emit('my response', json)
+   
+
+@Parking.route('/parking_main')
+class Parking_main(Resource):
+    @jwt_required()
+    def post(self):
+        handle_my_custom_event("fdfdfdfdf")
+        print(request.json)
+        current_user_id = get_jwt_identity()
+        date =request.json["date"]
+        week = request.json["week"]
+        time=request.json["time"]
+        print(date,week,time)
+        grab_id=""
+        grab_list=[]
+        
+     
+        
+        try:
+            grab_id = dao.get_user(self,"users","userId",current_user_id)[0]['carNum']
+           
+            grab_list = dao.get_main(self,"parking_table","입차_일",grab_id,date,week,time)
+        
+        except:
+            print()
+            #grab_id=[]
+            grab_list=[]
+
+        print(grab_list)
+        return([{"name":"오늘 입차 대수","value":len(grab_list)},{"name":"오늘 출차 대수","value":len(grab_list)},{"name":"총 차량 대수","value":len(grab_list)},{"name":"교통량","value":len(grab_list)}])
+
 @Parking.route('/parking_list')
 class Parking_list(Resource):
     @jwt_required()
@@ -141,11 +179,13 @@ class Parking_list(Resource):
             grab_list=[]
 
         print(grab_list)
-        return([{"name":"오늘 입차 대수","value":len(grab_list)},{"name":"오늘 출차 대수","value":len(grab_list)},{"name":"총 차량 대수","value":len(grab_list)},{"name":"교통량","value":len(grab_list)}])
-        #return [jsonify(name="오늘 입차 대수",value=len(grab_list)),jsonify(name="오늘 출차 대수",value=len(grab_list)),jsonify(name="총 차량 대수",value=len(grab_list)),jsonify(name="교통량",value=len(grab_list))]
-        #return jsonify(today_in=len(grab_list),today_out=len(grab_list),today_all=len(grab_list),traffic=0)
-@Parking.route('/test_token')
+        #return([{"name":"오늘 입차 대수","value":len(grab_list)},{"name":"오늘 출차 대수","value":len(grab_list)},{"name":"총 차량 대수","value":len(grab_list)},{"name":"교통량","value":len(grab_list)}])
+        return jsonify(grab_list)
 
+
+    
+####################################토큰테스트@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@Parking.route('/test_token')
 class token(Resource):
     @jwt_required()
     def post(self):
