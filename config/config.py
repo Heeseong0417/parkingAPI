@@ -15,5 +15,5 @@ class Config(object):
     JWT_SECRET_KEY = "valiantdata_parking_project"
     
 DB_URL = f"mysql+mysqlconnector://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['database']}?charset=utf8"
-PORT = 8002
+PORT = 8082
 HOST_IP = '0.0.0.0'

@@ -17,7 +17,7 @@ from modules.database.database import parkingDAO as dao;
 from config.config import Config;
 
 Parking = Namespace("ParkingGoApi",description="traffic api")
-SIO = SocketIO()
+SIO = SocketIO(debug=True)
 
 """
 parking_model = Parking.model('parking_model',{
@@ -118,17 +118,23 @@ class site_up(Resource):
         # 유저 정보가 없거나 비밀번호가 일치하지 않는 경우 401 코드 반환
             return '', 401
 
-@SIO.on(message="test")
-def handle_my_custom_event(json):
-    print('received my event: ' + str(json))
-    SIO.emit('my response', json)
-   
+@SIO.on('connect')
+def handle_connect():
+    print('Client connected')
+    
+"""
+@SIO.on('test1')
+def handle_message():
+    print("good~")
+    #socketio.emit("test","굿")
+    # echo back the received message to the client
+ """   
 
 @Parking.route('/parking_main')
 class Parking_main(Resource):
     @jwt_required()
     def post(self):
-        handle_my_custom_event("fdfdfdfdf")
+        SIO.emit("test","굿")
         print(request.json)
         current_user_id = get_jwt_identity()
         date =request.json["date"]
@@ -152,6 +158,14 @@ class Parking_main(Resource):
 
         print(grab_list)
         return([{"name":"오늘 입차 대수","value":len(grab_list)},{"name":"오늘 출차 대수","value":len(grab_list)},{"name":"총 차량 대수","value":len(grab_list)},{"name":"교통량","value":len(grab_list)}])
+
+@Parking.route('/socket_in_car')
+class Socket_in_car(Resource):
+    @jwt_required()
+    def post(self):
+        print("run!")
+         #current_user_id = get_jwt_identity()
+        SIO.emit("test","39가1234")
 
 @Parking.route('/parking_list')
 class Parking_list(Resource):

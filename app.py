@@ -23,7 +23,7 @@ def create_flask():
     def index():
         return 'index'
     """
-    main_controller.SIO.init_app(app,cors_allowed_origins="*",async_mode='threading')
+    main_controller.SIO.init_app(app,cors_allowed_origins="*")
 
 
     api = Api(app,title="ParkingGoApi",description="traffic api")
@@ -32,4 +32,21 @@ def create_flask():
     return app
 
 def create_socket():
-    return main_controller.SIO.run(app,cors_allowed_origins="*")
+    jwt =JWTManager(app)
+    
+    #app.config['JWT_ALGORITHM'] = 'RS256'
+    #app.config['JWT_DECODE_ALGORITHMS'] = ['RS256']
+    app.secret_key = "mysecret"
+    app.config['JWT_SECRET_KEY'] = "valiantdata_parking_project"
+    """
+    @app.route('/')
+    def index():
+        return 'index'
+    """
+    main_controller.SIO.init_app(app,cors_allowed_origins="*")
+
+
+    api = Api(app,title="ParkingGoApi",description="traffic api")
+    api.add_namespace(main_controller.Parking, '/parking')   
+
+    return main_controller.SIO.run(app,host=HOST_IP,port=PORT)
